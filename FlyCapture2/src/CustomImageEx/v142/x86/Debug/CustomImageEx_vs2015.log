@@ -1,0 +1,3 @@
+﻿  stdafx.cpp
+  CustomImageEx.cpp
+LINK : fatal error LNK1104: cannot open file 'FlyCapture2d_v142.lib'

@@ -1,0 +1,61 @@
+for (int imageCount = 0; imageCount < k_numImages; imageCount++)
+	{
+		// Retrieve an image
+		error = cam.RetrieveBuffer(&rawImage);
+		if (error != PGRERROR_OK)
+		{
+			PrintError(error);
+			continue;
+		}
+		cout << "..................." << endl;
+
+		// Get the raw image dimensions
+		PixelFormat pixFormat;
+		unsigned int rows, cols, stride;
+		rawImage.GetDimensions(&rows, &cols, &stride, &pixFormat);
+		cout << "rows: = " << rows << endl;
+		cout << "cols: = " << cols << endl;
+		cout << "pixFormat: - " << pixFormat << endl;
+		
+
+		// Create a converted image
+		//Image convertedImage;
+		//unsigned char* raw_iimage = convertedImage.GetData();
+		// Convert the raw image
+		//error = rawImage.Convert(PIXEL_FORMAT_BGRU, &convertedImage);
+		
+		// In 8 bits per pixel modes, the first byte represents the pixel at [row 0, column 0],
+		// the second byte at[row 0, column 1], and so on.The top left corner of the image data represents row 0, column 0.
+		// Eg. assumming image is 320 x 256, char* data = rawImage.Getdata(). length(data) = 320 x256 = 81920
+		// data[0] = Row 0, Column 0 
+		// data[1] = Row 0, Column 1
+		// data[320] = Row 1, Column 0 
+		// data[321] = Row 1, Column 1 
+		unsigned char* cvrt_iimage = rawImage.GetData();
+		int count = 0;
+		int** imagedata = imageThreshold(cvrt_iimage, 180, rows, cols);
+		int* pCentroid = getCentroid(imagedata, rows, cols);
+		cout << "The centroid of image(" << imageCount << ") = [" << *pCentroid << ", " << *(pCentroid + 1) << "]" << endl;
+		/*+
+		if (error != PGRERROR_OK)
+		{
+			PrintError(error);
+			return -1;
+		}
+		*/
+		cout << "Press any key to take next frame" << endl;
+		cin.get();
+		// Create a unique filename
+
+		ostringstream filename;
+		filename << camInfo.serialNumber << "-" << imageCount << ".bmp";
+
+		// Save the image. If a file format is not passed in, then the file
+		// extension is parsed to attempt to determine the file format.
+		error = rawImage.Save(filename.str().c_str());
+		if (error != PGRERROR_OK)
+		{
+			PrintError(error);
+			return -1;
+		}
+	}
